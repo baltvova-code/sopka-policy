@@ -31,11 +31,13 @@ const existing={
   en:{title:'SOPKA — Privacy Policy',description:'SOPKA Privacy Policy by blaZe apps: ride data, sensors, external services, diagnostics, retention and deletion.',labels:{skip:'Skip to policy',homeAria:'SOPKA — back to top',language:'Language',heroTitle:'Privacy policy',heroSubtitle:'SOPKA / PRIVACY',heroTagline:'Your rides. Your data.',navigation:'Policy navigation',inDocument:'In this document',policy:'Policy in English',deletion:'Data deletion',support:'Support',noAdvertising:'No advertising.',backToTop:'Back to top ↑',by:'by blaZe apps',languageName:'English',fontLicense:'Roboto Flex · OFL 1.1'}}
 };
 export async function copyFor(language){return existing[language]??JSON.parse(await fs.readFile(new URL(`translations/${language}.json`,ROOT),'utf8'));}
-function languageLinks(language,legacy=false){
-  return LANGUAGES.map(code=>{
-    const href=legacy?(code==='ru'||code==='en'?`#${code}`:`${code}/`):`../${code}/`;
-    return `<a href="${href}" lang="${code}" hreflang="${code}"${code===language?' aria-current="page"':''}><img class="language-flag" src="${legacy?'':'../'}assets/flag-${code}.svg" width="24" height="18" alt="">${NATIVE_NAMES[code]} <span aria-hidden="true">↗</span></a>`;
-  }).join('');
+const SHORT_NAMES={ru:'RU',en:'EN',kk:'KK',es:'ES','pt-BR':'PT'};
+function languageLinks(language,legacy=false,label='Language'){
+ const prefix=legacy?'':'../';
+ const flag=code=>`<img class="language-flag" src="${prefix}assets/flag-${code}.svg" width="24" height="18" alt="">`;
+ const links=LANGUAGES.map(code=>`<a href="${prefix}${code}/" lang="${code}" hreflang="${code}"${code===language?' aria-current="page"':''}>${flag(code)}<span>${NATIVE_NAMES[code]}</span><span class="language-check" aria-hidden="true">✓</span></a>`).join('');
+ const current=language?flag(language)+`<span>${SHORT_NAMES[language]}</span>`:flag('ru')+flag('en')+'<span>RU/EN</span>';
+ return `<details class="policy-languages"><summary aria-label="${escape(label)}: ${escape(language?NATIVE_NAMES[language]:'Русский / English')}">${current}<span class="language-chevron" aria-hidden="true"></span></summary><div class="policy-language-list">${links}</div></details>`;
 }
 function seo(language){
   return `<link rel="canonical" href="${BASE}${language?language+'/':''}">\n`+
@@ -56,7 +58,7 @@ export function translatedArticle(english,language,copy){
     .replaceAll('id="delete-en"',`id="delete-${language}"`);
 }
 
-const flagStyle='<style>nav a{gap:10px}.language-flag{display:block;width:24px;height:18px;object-fit:contain;border-radius:3px;box-shadow:0 0 0 1px #17201720,0 2px 4px #17201718;flex:none}</style>';
+const flagStyle="<style>\nheader{min-height:80px;padding:12px 0}\n.policy-languages{position:relative;margin:0;padding:0;border:0}\n.policy-languages>summary{display:flex;align-items:center;gap:9px;min-height:44px;padding:9px 13px;list-style:none;border:1px solid transparent;border-radius:24px;background:var(--soft);color:var(--accent);font:inherit;font-size:14px;font-weight:500;line-height:1.4;white-space:nowrap;cursor:pointer;user-select:none}\n.policy-languages>summary::-webkit-details-marker{display:none}\n.policy-languages>summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px}\n.language-flag{display:block;width:24px;height:18px;object-fit:contain;border-radius:3px;box-shadow:0 0 0 1px #17201720,0 2px 4px #17201718;flex:none}\n.language-chevron{width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);margin:-3px 1px 0 3px}\n.policy-languages[open] .language-chevron{transform:rotate(225deg);margin-top:3px}\n.policy-language-list{position:absolute;top:calc(100% + 8px);right:0;z-index:20;display:grid;width:246px;max-width:calc(100vw - 36px);padding:6px;background:var(--surface);border:1px solid var(--line);border-radius:15px;box-shadow:0 12px 28px #0003}\nnav .policy-language-list a{display:flex;align-items:center;gap:12px;min-height:46px;padding:10px 12px;border-radius:8px;background:transparent;font-size:14px;font-weight:500;white-space:nowrap}\nnav .policy-language-list a:hover,nav .policy-language-list a[aria-current=page]{background:var(--soft)}\n.language-check{margin-left:auto;visibility:hidden}\n[aria-current=page]>.language-check{visibility:visible}\n@media(max-width:700px){header{min-height:76px;flex-wrap:nowrap;gap:12px;padding:12px 0}.identity{flex-direction:column;gap:2px;align-items:flex-start}.maker{font-size:13px}}\n</style>";
 function pageHead(template,language,copy){
   const head=template.slice(0,template.indexOf('</head>'));
   return head.replace('<html lang="ru">',`<html lang="${language}">`)
@@ -73,7 +75,7 @@ export function renderLocalized(source,language,copy){
 <div class="shell">
 <header>
 <div class="identity"><a class="wordmark" href="#top" aria-label="${escape(labels.homeAria)}">SOPKA<span class="dot">.</span></a><span class="maker">${escape(labels.by)}</span></div>
-<nav aria-label="${escape(labels.language)}">${languageLinks(language)}</nav>
+<nav aria-label="${escape(labels.language)}">${languageLinks(language,false,labels.language)}</nav>
 </header>
 <main id="top">
 <div class="hero"><span class="eyebrow">${escape(labels.heroSubtitle)}</span>
@@ -91,7 +93,7 @@ export function renderLocalized(source,language,copy){
 export function renderLegacy(source){
   const entries=[['kk','Қазақ тіліндегі саясат'],['es','Política en español'],['pt-BR','Política em português']];
   const more=entries.map(([code,text])=>`<a href="${code}/" lang="${code}">${text}</a>`).join('');
-  return source.html.replace(/<nav aria-label="Язык \/ Language">[\s\S]*?<\/nav>/,`<nav aria-label="Язык / Language">${languageLinks(null,true)}</nav>`)
+  return source.html.replace(/<nav aria-label="Язык \/ Language">[\s\S]*?<\/nav>/,`<nav aria-label="Язык / Language">${languageLinks(null,true,'Язык / Language')}</nav>`)
     .replace('<div class="support">',more+'<div class="support">')
     .replace('</head>',seo(null)+flagStyle+'</head>');
 }

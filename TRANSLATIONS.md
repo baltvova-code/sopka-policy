@@ -96,3 +96,8 @@ flag-icons7.6.0 bundle as the SOPKA website (GB/RU/KZ/ES/BR).
 The unchanged MIT notice and byte hashes are in `assets/flag-icons-LICENSE.txt`
 and `assets/flag-icons-provenance.json`. No policy text, script or external
 request was added by this visual change.
+
+The language area now uses one compact native `<details>` disclosure: current
+flag + language code, with all five native-name links in the popup. It works
+without JavaScript. The legacy bilingual root shows RU/EN and opens dedicated
+language pages; existing article/deletion anchors remain unchanged.
