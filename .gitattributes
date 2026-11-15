@@ -1,0 +1,8 @@
+# Source-policy article byte comparisons use the published LF Git blob.
+/index.html text eol=lf
+/templates/source-2026-11-14.html text eol=lf
+/en/index.html text eol=lf
+/ru/index.html text eol=lf
+/kk/index.html text eol=lf
+/es/index.html text eol=lf
+/pt-BR/index.html text eol=lf

@@ -47,4 +47,44 @@ The test checks the real published-source digest,62blocks per language, exact
 HTML tags/hrefs, numeric constraints and percentages, named recipients and
 technical facts, shell-label completeness and unchanged EN/RU articles.
 It does not certify legal equivalence or native pronunciation. No Android,
-Pixel, external account or public website was changed by this text-only task.
+Pixel, external account or public website was changed by this task.
+
+## Six static pages
+
+The follow-up rendering stage keeps the existing root `index.html` and both
+published RU/EN articles byte-identical to the fixed source template inside it.
+Root navigation now offers all five languages; old `#ru`, `#en`, `#delete-ru`
+and `#delete-en` anchors remain available. Added `en/`, `ru/`, `kk/`, `es/` and
+`pt-BR/` each contain exactly one complete article and its fully localized shell.
+Native language names link all pages to each other. Canonical/alternate links
+use the existing `https://baltvova-code.github.io/sopka-policy/` address.
+
+`templates/source-2026-11-14.html` is the verified Git blob from `fec805f7`.
+`scripts/build-languages.mjs` refuses a template/block digest mismatch, keeps
+the source tag/list structure and inserts translated inner fragments. `.gitattributes`
+keeps these HTML files in LF so the published-source byte comparison survives
+Windows checkouts. Styles, font sizes and local fonts remain the source design;
+only the standalone pages' font paths become `../assets/`. No `<base>`, JavaScript,
+external fonts, analytics or hidden empty policy content were added.
+
+Regenerate and check from the policy checkout:
+
+```text
+node scripts/build-languages.mjs
+node scripts/build-languages.mjs --check
+node --test tests/translation-assets.test.mjs tests/static-languages.test.mjs
+git diff --check
+```
+
+`--capture-source` can recreate the immutable template only from the exact
+provenance commit after verifying its byte digest. Normal builds use the
+template, not the already rendered root HTML. Tests check all six pages,
+all five native language links, complete localized shells, all62blocks,
+source article bytes, unchanged style declarations, anchors and real local
+font/license files. Browser layout review and Pages publication remain with
+the integrating agent; this stage does not push or deploy.
+
+Final rendered-stage result: **27/27 PASS,0skips** across the source/translation
+and six-page static checks; generator `--check`, Node syntax and
+`git diff --check` also pass. All six pages are ready for the integrator's
+browser review: `/`, `/en/`, `/ru/`, `/kk/`, `/es/` and `/pt-BR/`.

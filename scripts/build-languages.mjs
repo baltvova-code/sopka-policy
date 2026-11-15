@@ -1,0 +1,118 @@
+import fs from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
+
+export const ROOT=new URL('../',import.meta.url);
+export const BASE='https://baltvova-code.github.io/sopka-policy/';
+export const LANGUAGES=['ru','en','kk','es','pt-BR'];
+export const NATIVE_NAMES={ru:'Русский',en:'English',kk:'Қазақша',es:'Español','pt-BR':'Português (Brasil)'};
+const TEMPLATE=new URL('templates/source-2026-11-14.html',ROOT);
+const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
+const escape=value=>String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+export const blocks=article=>[...article.matchAll(/<(h2|h3|p|li)\b[^>]*>([\s\S]*?)<\/\1>/g)].map(match=>match[2]);
+export function sourceArticle(html,language){
+  const found=new RegExp(`<article\\b[^>]*id="${language}"[^>]*>[\\s\\S]*?<\\/article>`).exec(html);
+  if(!found)throw Error('Missing source article '+language);
+  return found[0];
+}
+
+export async function readSource(){
+  const source=JSON.parse(await fs.readFile(new URL('translations/source.json',ROOT),'utf8'));
+  const bytes=await fs.readFile(TEMPLATE);
+  if(hash(bytes)!==source.gitBlobSha256)throw Error('Published source template hash mismatch');
+  const html=bytes.toString('utf8'),en=sourceArticle(html,'en'),ru=sourceArticle(html,'ru');
+  if(blocks(en).length!==62||hash(JSON.stringify(blocks(en)))!==source.englishBlocksSha256)throw Error('Published English block digest mismatch');
+  return {html,en,ru,source};
+}
+
+const existing={
+  ru:{title:'SOPKA — Политика конфиденциальности',description:'Политика конфиденциальности SOPKA от blaZe apps: данные поездок, датчики, внешние сервисы, диагностика, хранение и удаление.',labels:{skip:'К тексту политики',homeAria:'SOPKA — в начало',language:'Язык',heroTitle:'Политика конфиденциальности',heroSubtitle:'SOPKA / КОНФИДЕНЦИАЛЬНОСТЬ',heroTagline:'Ваши поездки. Ваши данные.',navigation:'Навигация по политике',inDocument:'В этом документе',policy:'Политика на русском',deletion:'Удаление данных',support:'Поддержка',noAdvertising:'Без рекламы.',backToTop:'Наверх ↑',by:'от blaZe apps',languageName:'Русский',fontLicense:'Roboto Flex · OFL 1.1'}},
+  en:{title:'SOPKA — Privacy Policy',description:'SOPKA Privacy Policy by blaZe apps: ride data, sensors, external services, diagnostics, retention and deletion.',labels:{skip:'Skip to policy',homeAria:'SOPKA — back to top',language:'Language',heroTitle:'Privacy policy',heroSubtitle:'SOPKA / PRIVACY',heroTagline:'Your rides. Your data.',navigation:'Policy navigation',inDocument:'In this document',policy:'Policy in English',deletion:'Data deletion',support:'Support',noAdvertising:'No advertising.',backToTop:'Back to top ↑',by:'by blaZe apps',languageName:'English',fontLicense:'Roboto Flex · OFL 1.1'}}
+};
+export async function copyFor(language){return existing[language]??JSON.parse(await fs.readFile(new URL(`translations/${language}.json`,ROOT),'utf8'));}
+function languageLinks(language,legacy=false){
+  return LANGUAGES.map(code=>{
+    const href=legacy?(code==='ru'||code==='en'?`#${code}`:`${code}/`):`../${code}/`;
+    return `<a href="${href}" lang="${code}" hreflang="${code}"${code===language?' aria-current="page"':''}>${NATIVE_NAMES[code]} <span aria-hidden="true">↗</span></a>`;
+  }).join('');
+}
+function seo(language){
+  return `<link rel="canonical" href="${BASE}${language?language+'/':''}">\n`+
+    LANGUAGES.map(code=>`<link rel="alternate" hreflang="${code}" href="${BASE}${code}/">`).join('\n')+
+    `\n<link rel="alternate" hreflang="x-default" href="${BASE}">\n`;
+}
+
+export function translatedArticle(english,language,copy){
+  let count=0;
+  const translated=english.replace(/(<(h2|h3|p|li)\b[^>]*>)([\s\S]*?)(<\/\2>)/g,(_match,open,_tag,_inner,close)=>{
+    const value=copy.blocks[count++];
+    if(typeof value!=='string'||!value.trim())throw Error(`Missing ${language} block ${count-1}`);
+    return open+value+close;
+  });
+  if(count!==62||copy.blocks.length!==count)throw Error('Translation block count mismatch '+language);
+  return translated.replace('id="en" lang="en"',`id="${language}" lang="${language}"`)
+    .replaceAll('id="title-en"',`id="title-${language}"`).replaceAll('aria-labelledby="title-en"',`aria-labelledby="title-${language}"`)
+    .replaceAll('id="delete-en"',`id="delete-${language}"`);
+}
+
+function pageHead(template,language,copy){
+  const head=template.slice(0,template.indexOf('</head>'));
+  return head.replace('<html lang="ru">',`<html lang="${language}">`)
+    .replace(/<title>[^<]*<\/title>/,`<title>${escape(copy.title)}</title>`)
+    .replace(/<meta name="description"[^>]*>/,`<meta name="description" content="${escape(copy.description)}">`)
+    .replaceAll('url(assets/','url(../assets/')+seo(language)+'</head>';
+}
+export function renderLocalized(source,language,copy){
+  const labels=copy.labels;
+  const article=language==='en'?source.en:language==='ru'?source.ru:translatedArticle(source.en,language,copy);
+  const tagline=escape(labels.heroTagline).replace('. ','.<br>');
+  return pageHead(source.html,language,copy)+`<body>
+<a class="skip" href="#${language}">${escape(labels.skip)}</a>
+<div class="shell">
+<header>
+<div class="identity"><a class="wordmark" href="#top" aria-label="${escape(labels.homeAria)}">SOPKA<span class="dot">.</span></a><span class="maker">${escape(labels.by)}</span></div>
+<nav aria-label="${escape(labels.language)}">${languageLinks(language)}</nav>
+</header>
+<main id="top">
+<div class="hero"><span class="eyebrow">${escape(labels.heroSubtitle)}</span>
+<h1>${escape(labels.heroTitle)}</h1>
+<p>${tagline}</p>
+<div class="route" aria-hidden="true"><span></span><span></span><span></span></div></div>
+<div class="layout">
+<aside aria-label="${escape(labels.navigation)}"><div class="side-label">${escape(labels.inDocument)}</div><a href="#${language}">${escape(labels.policy)}</a><a href="#delete-${language}">${escape(labels.deletion)}</a><div class="support"><span>${escape(labels.support)}</span><a href="https://sopka.fun/">sopka.fun</a></div><p class="note">${escape(labels.noAdvertising)}</p></aside>
+<div class="policies">${article}</div></div>
+</main>
+<footer><span class="footer-brand">SOPKA · blaZe apps</span><a href="#top">${escape(labels.backToTop)}</a><a href="../assets/roboto-flex-OFL.txt">${escape(labels.fontLicense)}</a></footer>
+</div></body></html>
+`;
+}
+export function renderLegacy(source){
+  const entries=[['kk','Қазақ тіліндегі саясат'],['es','Política en español'],['pt-BR','Política em português']];
+  const more=entries.map(([code,text])=>`<a href="${code}/" lang="${code}">${text}</a>`).join('');
+  return source.html.replace(/<nav aria-label="Язык \/ Language">[\s\S]*?<\/nav>/,`<nav aria-label="Язык / Language">${languageLinks(null,true)}</nav>`)
+    .replace('<div class="support">',more+'<div class="support">')
+    .replace('</head>',seo(null)+'</head>');
+}
+
+export async function buildPages({check=false}={}){
+  const source=await readSource(),pages=new Map([['index.html',renderLegacy(source)]]);
+  for(const language of LANGUAGES)pages.set(`${language}/index.html`,renderLocalized(source,language,await copyFor(language)));
+  for(const [relative,html]of pages){
+    const destination=new URL(relative,ROOT);
+    if(check){if(await fs.readFile(destination,'utf8')!==html)throw Error('Stale policy page '+relative);}
+    else{await fs.mkdir(new URL('./',destination),{recursive:true});await fs.writeFile(destination,html);}
+  }
+  return pages;
+}
+
+if(process.argv[1]===fileURLToPath(import.meta.url)){
+  if(process.argv.includes('--capture-source')){
+    const provenance=JSON.parse(await fs.readFile(new URL('translations/source.json',ROOT),'utf8'));
+    const bytes=execFileSync('git',['show',`${provenance.commit}:index.html`]);
+    if(hash(bytes)!==provenance.gitBlobSha256)throw Error('Unexpected source commit content');
+    await fs.mkdir(new URL('templates/',ROOT),{recursive:true});await fs.writeFile(TEMPLATE,bytes);
+  }
+  const pages=await buildPages({check:process.argv.includes('--check')});
+  console.log(`${pages.size} static policy pages ${process.argv.includes('--check')?'verified':'rendered'}; no scripts or remote fonts.`);
+}
