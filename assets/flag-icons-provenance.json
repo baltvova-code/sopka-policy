@@ -1,0 +1,61 @@
+{
+  "name": "flag-icons",
+  "version": "7.6.0",
+  "repository": "https://github.com/lipis/flag-icons",
+  "gitCommit": "6d6982dc20b2eb50967a343f05b60fbb81014e5f",
+  "tarball": "https://registry.npmjs.org/flag-icons/-/flag-icons-7.6.0.tgz",
+  "npmIntegrity": "sha512-hir/PsXwr0EESyizKrXJzmkzpLIMf+1vlNKLqAfvdh+bsU94a7LYWTiubkHKqptGoCPzOUGcm6c4PfC9/BaGSQ==",
+  "tarballSha256": "99d6feb80562dcaa83700ef184094d7c7b6587cc216b3fab1546cb1643e611a9",
+  "integrityVerified": true,
+  "license": "MIT",
+  "licenseFile": "flag-icons-LICENSE.txt",
+  "licenseSha256": "8f1195d55a2fd315a07d812328470ca9ba2abb78c8d317ff19619d5125e00cea",
+  "changes": "Five exact upstream 4x3 SVG files renamed for SOPKA language identifiers; SVG contents unchanged.",
+  "files": [
+    {
+      "locale": "en",
+      "country": "gb",
+      "source": "flags/4x3/gb.svg",
+      "file": "flag-en.svg",
+      "sha256": "c8be1e7208798a4ae692ee1e937065d498bb29e741943f6172b29118b8ed8066",
+      "bytes": 504,
+      "viewBox": "0 0 640 480"
+    },
+    {
+      "locale": "ru",
+      "country": "ru",
+      "source": "flags/4x3/ru.svg",
+      "file": "flag-ru.svg",
+      "sha256": "7100aaae51ff3b6a2bf0ca932b3bc518bdc760814725e7cca31d821a26c3dd7c",
+      "bytes": 225,
+      "viewBox": "0 0 640 480"
+    },
+    {
+      "locale": "kk",
+      "country": "kz",
+      "source": "flags/4x3/kz.svg",
+      "file": "flag-kk.svg",
+      "sha256": "381b22e4c287b13e191c208bccfc2cfb9156cd657de248f033b920a0c713a1f3",
+      "bytes": 7094,
+      "viewBox": "0 0 640 480"
+    },
+    {
+      "locale": "es",
+      "country": "es",
+      "source": "flags/4x3/es.svg",
+      "file": "flag-es.svg",
+      "sha256": "f9cfaff858e95f830733ade9591037b5322dfb5827a53b70956a3d190bb49b9a",
+      "bytes": 80958,
+      "viewBox": "0 0 640 480"
+    },
+    {
+      "locale": "pt-BR",
+      "country": "br",
+      "source": "flags/4x3/br.svg",
+      "file": "flag-pt-BR.svg",
+      "sha256": "b0a912826c3ffd7287435ebed66e18fe058e992309c00dc10b430dd41a29ba91",
+      "bytes": 7140,
+      "viewBox": "0 0 640 480"
+    }
+  ]
+}

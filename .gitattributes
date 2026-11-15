@@ -6,3 +6,8 @@
 /kk/index.html text eol=lf
 /es/index.html text eol=lf
 /pt-BR/index.html text eol=lf
+
+# Keep the pinned upstream flag hashes stable across Windows checkouts.
+/assets/flag-*.svg text eol=lf
+/assets/flag-icons-LICENSE.txt text eol=lf
+/assets/flag-icons-provenance.json text eol=lf

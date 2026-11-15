@@ -88,3 +88,11 @@ Final rendered-stage result: **27/27 PASS,0skips** across the source/translation
 and six-page static checks; generator `--check`, Node syntax and
 `git diff --check` also pass. All six pages are ready for the integrator's
 browser review: `/`, `/en/`, `/ru/`, `/kk/`, `/es/` and `/pt-BR/`.
+
+## Language flags
+
+The five language links use local 4:3 SVG flags from the same pinned
+flag-icons7.6.0 bundle as the SOPKA website (GB/RU/KZ/ES/BR).
+The unchanged MIT notice and byte hashes are in `assets/flag-icons-LICENSE.txt`
+and `assets/flag-icons-provenance.json`. No policy text, script or external
+request was added by this visual change.

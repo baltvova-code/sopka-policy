@@ -34,7 +34,7 @@ export async function copyFor(language){return existing[language]??JSON.parse(aw
 function languageLinks(language,legacy=false){
   return LANGUAGES.map(code=>{
     const href=legacy?(code==='ru'||code==='en'?`#${code}`:`${code}/`):`../${code}/`;
-    return `<a href="${href}" lang="${code}" hreflang="${code}"${code===language?' aria-current="page"':''}>${NATIVE_NAMES[code]} <span aria-hidden="true">↗</span></a>`;
+    return `<a href="${href}" lang="${code}" hreflang="${code}"${code===language?' aria-current="page"':''}><img class="language-flag" src="${legacy?'':'../'}assets/flag-${code}.svg" width="24" height="18" alt="">${NATIVE_NAMES[code]} <span aria-hidden="true">↗</span></a>`;
   }).join('');
 }
 function seo(language){
@@ -56,12 +56,13 @@ export function translatedArticle(english,language,copy){
     .replaceAll('id="delete-en"',`id="delete-${language}"`);
 }
 
+const flagStyle='<style>nav a{gap:10px}.language-flag{display:block;width:24px;height:18px;object-fit:contain;border-radius:3px;box-shadow:0 0 0 1px #17201720,0 2px 4px #17201718;flex:none}</style>';
 function pageHead(template,language,copy){
   const head=template.slice(0,template.indexOf('</head>'));
   return head.replace('<html lang="ru">',`<html lang="${language}">`)
     .replace(/<title>[^<]*<\/title>/,`<title>${escape(copy.title)}</title>`)
     .replace(/<meta name="description"[^>]*>/,`<meta name="description" content="${escape(copy.description)}">`)
-    .replaceAll('url(assets/','url(../assets/')+seo(language)+'</head>';
+    .replaceAll('url(assets/','url(../assets/')+seo(language)+flagStyle+'</head>';
 }
 export function renderLocalized(source,language,copy){
   const labels=copy.labels;
@@ -92,7 +93,7 @@ export function renderLegacy(source){
   const more=entries.map(([code,text])=>`<a href="${code}/" lang="${code}">${text}</a>`).join('');
   return source.html.replace(/<nav aria-label="Язык \/ Language">[\s\S]*?<\/nav>/,`<nav aria-label="Язык / Language">${languageLinks(null,true)}</nav>`)
     .replace('<div class="support">',more+'<div class="support">')
-    .replace('</head>',seo(null)+'</head>');
+    .replace('</head>',seo(null)+flagStyle+'</head>');
 }
 
 export async function buildPages({check=false}={}){
