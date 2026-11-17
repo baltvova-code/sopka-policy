@@ -65,7 +65,7 @@ for(const {relative,language,html}of pages){
     const copy=await copyFor(language),article=sourceArticle(html,language);
     assert.ok(html.includes(`<html lang="${language}">`));
     assert.equal((html.match(/<article\b/g)||[]).length,1);
-    assert.equal(blocks(article).length,62);
+    assert.equal(blocks(article).length,80);
     assert.deepEqual(blocks(article),language==='en'?blocks(source.en):language==='ru'?blocks(source.ru):copy.blocks);
     assert.ok(html.includes(`<title>${escape(copy.title)}</title>`));
     assert.ok(html.includes(`name="description" content="${escape(copy.description)}"`));

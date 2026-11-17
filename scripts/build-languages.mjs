@@ -1,13 +1,12 @@
 import fs from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 
 export const ROOT=new URL('../',import.meta.url);
 export const BASE='https://baltvova-code.github.io/sopka-policy/';
 export const LANGUAGES=['ru','en','kk','es','pt-BR'];
 export const NATIVE_NAMES={ru:'Русский',en:'English',kk:'Қазақша',es:'Español','pt-BR':'Português (Brasil)'};
-const TEMPLATE=new URL('templates/source-2026-11-14.html',ROOT);
+const TEMPLATE=new URL('templates/source-2026-11-17.html',ROOT);
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const escape=value=>String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 export const blocks=article=>[...article.matchAll(/<(h2|h3|p|li)\b[^>]*>([\s\S]*?)<\/\1>/g)].map(match=>match[2]);
@@ -20,9 +19,9 @@ export function sourceArticle(html,language){
 export async function readSource(){
   const source=JSON.parse(await fs.readFile(new URL('translations/source.json',ROOT),'utf8'));
   const bytes=await fs.readFile(TEMPLATE);
-  if(hash(bytes)!==source.gitBlobSha256)throw Error('Published source template hash mismatch');
+  if(source.templateFile!=='templates/source-2026-11-17.html'||hash(bytes)!==source.templateSha256)throw Error('Authored source template hash mismatch');
   const html=bytes.toString('utf8'),en=sourceArticle(html,'en'),ru=sourceArticle(html,'ru');
-  if(blocks(en).length!==62||hash(JSON.stringify(blocks(en)))!==source.englishBlocksSha256)throw Error('Published English block digest mismatch');
+  if(blocks(en).length!==source.englishBlockCount||source.englishBlockCount!==80||hash(JSON.stringify(blocks(en)))!==source.englishBlocksSha256)throw Error('Authored English block digest mismatch');
   return {html,en,ru,source};
 }
 
@@ -52,7 +51,7 @@ export function translatedArticle(english,language,copy){
     if(typeof value!=='string'||!value.trim())throw Error(`Missing ${language} block ${count-1}`);
     return open+value+close;
   });
-  if(count!==62||copy.blocks.length!==count)throw Error('Translation block count mismatch '+language);
+  if(count!==80||copy.blocks.length!==count)throw Error('Translation block count mismatch '+language);
   return translated.replace('id="en" lang="en"',`id="${language}" lang="${language}"`)
     .replaceAll('id="title-en"',`id="title-${language}"`).replaceAll('aria-labelledby="title-en"',`aria-labelledby="title-${language}"`)
     .replaceAll('id="delete-en"',`id="delete-${language}"`);
@@ -111,10 +110,7 @@ export async function buildPages({check=false}={}){
 
 if(process.argv[1]===fileURLToPath(import.meta.url)){
   if(process.argv.includes('--capture-source')){
-    const provenance=JSON.parse(await fs.readFile(new URL('translations/source.json',ROOT),'utf8'));
-    const bytes=execFileSync('git',['show',`${provenance.commit}:index.html`]);
-    if(hash(bytes)!==provenance.gitBlobSha256)throw Error('Unexpected source commit content');
-    await fs.mkdir(new URL('templates/',ROOT),{recursive:true});await fs.writeFile(TEMPLATE,bytes);
+    throw Error('The account source is authored. Use build-account-source.mjs; the November14 template is immutable.');
   }
   const pages=await buildPages({check:process.argv.includes('--check')});
   console.log(`${pages.size} static policy pages ${process.argv.includes('--check')?'verified':'rendered'}; no scripts or remote fonts.`);

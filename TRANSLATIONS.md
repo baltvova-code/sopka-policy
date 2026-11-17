@@ -1,5 +1,24 @@
 # SOPKA policy translations — 2026-11-15
 
+## Current authored account policy — 2026-11-17
+
+The account update has a separate immutable November14 baseline and an authored
+November17 source. `content/account-2026-11-17.mjs` changes five existing blocks
+and inserts18 cloud-account blocks in every language. All other existing
+disclosures remain exact. The80 blocks describe opt-in email/Google accounts,
+six data categories, exclusions, REG.RU, sessions/consent, actual quotas,
+retention and deletion. No independent legal/native-speaker review is claimed.
+
+`scripts/build-account-source.mjs` verifies the baseline SHA and recreates the
+new template, translations and provenance; historical KK/ES/PT assets are retained
+in `translations/archive-2026-11-14/`. `build-languages.mjs` verifies the authored
+template and all80 blocks, then builds the same six static pages and old anchors.
+Run both generators, `build-languages.mjs --check`, both existing test files and
+`git diff --check`. The tests retain unrelated-disclosure equality, exact links/
+markup/numbers, technical facts, local fonts, complete articles and navigation.
+Publication and visual verification are still pending. The notes below describe
+the preserved historical translation work, rather than the new effective date.
+
 Text assets for Kazakh, Spanish and Brazilian Portuguese were prepared from the
 published HTML in `fec805f7ea027cd669564b608fec9cec49541e01`, effective
 November 14, 2026. The older Android-repository `PRIVACY_POLICY.md` was not used.
