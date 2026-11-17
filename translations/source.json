@@ -2,8 +2,8 @@
   "commit": "fec805f7ea027cd669564b608fec9cec49541e01",
   "baselineGitBlobSha256": "1d51c5eea6efe56a852af1fdc7bac9b5d6ca6ff9b69e3042b7955c8dba5c89e9",
   "templateFile": "templates/source-2026-11-17.html",
-  "templateSha256": "74c8bba6ef3b0a95c41ae88dee9327d39794c0206470022c3f7cc221925feb0d",
-  "englishBlocksSha256": "12dcf03f97e5eecbc24c527afecc2d1da133ec12ced4e707f333a9346b4a3e8d",
+  "templateSha256": "0f1e29f8827a0b7daf5ea3d7a16f7a577f310003d24a26f5d5f2e4bc8843c486",
+  "englishBlocksSha256": "ddc3564b390ab4b88f4d64686277160b4c38bbbcc8615ba1614c5a006316210c",
   "englishBlockCount": 80,
   "effectiveDate": "2026-11-17"
 }
